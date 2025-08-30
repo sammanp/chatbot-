@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Customer Chatbot</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; padding: 0; display:flex; height:100vh; }
+      .chat { margin:auto; width:100%; max-width:600px; border:1px solid #ddd; display:flex; flex-direction:column; height:80vh; }
+      .messages { padding:10px; overflow:auto; flex:1; }
+      .input { display:flex; border-top:1px solid #eee; }
+      .input textarea { flex:1; padding:8px; border:0; resize:none; }
+      .input button { width:90px; border:0; background:#007bff; color:white; }
+      .msg { margin:6px 0; }
+      .me { text-align:right; }
+      .bot { text-align:left; }
+      .hint { font-size:0.9em; color:#666; }
+    </style>
+  </head>
+  <body>
+    <div class="chat">
+      <div class="messages" id="messages">
+        <div class="msg bot">Hi — I'm the support bot. Ask me anything.</div>
+      </div>
+      <div class="input">
+        <textarea id="input" rows="2" placeholder="Type your message..."></textarea>
+        <button id="send">Send</button>
+      </div>
+    </div>
+    <script>
+      const send = async () => {
+        const t = document.getElementById('input');
+        const v = t.value.trim();
+        if (!v) return;
+        const mdiv = document.getElementById('messages');
+        const el = document.createElement('div'); el.className='msg me'; el.textContent = v; mdiv.appendChild(el);
+        t.value = '';
+        const res = await fetch('/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message:v}) });
+        const json = await res.json();
+        const bel = document.createElement('div'); bel.className='msg bot'; bel.textContent = json.reply || json.error || '...'; mdiv.appendChild(bel);
+        mdiv.scrollTop = mdiv.scrollHeight;
+      }
+      document.getElementById('send').addEventListener('click', send);
+      document.getElementById('input').addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+    </script>
+  </body>
+</html>
